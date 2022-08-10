@@ -4,7 +4,7 @@ Procedure Part 1 [Arduino]:
 ==============================
 
 1. Hardware connection
-   According to .ino file
+   According to .ino file kept in _"/documents/smart_home_arduino_code.txt"_
    - LED pin 4
    - LDR - pin 14
    - DHT11 pin 2

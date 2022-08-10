@@ -1,0 +1,85 @@
+#include <Arduino.h>
+#include "DHT.h"
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+#define SCREEN_WIDTH 128 // OLED display width, in pixels
+#define SCREEN_HEIGHT 64 // OLED display height, in pixels
+
+// Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+
+#define dhtType DHT11
+#define dhtPin 2  
+
+const int ledPin = 4;  
+const int ldrPin = 14;  
+String message;
+   
+DHT dht(dhtPin, dhtType);
+
+void setup() {  
+
+  Serial.begin(115200);
+ 
+  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3D for 128x64
+    //Serial.println(F("SSD1306 allocation failed"));
+    for(;;);
+  }
+  delay(2000);
+ 
+  display.clearDisplay();
+  display.setTextColor(WHITE);
+ 
+  pinMode(ldrPin, INPUT);  
+  pinMode(ledPin, OUTPUT);  
+ 
+  Wire.begin();
+  dht.begin();
+}
+ 
+void loop() {
+ 
+    int ldrValue = analogRead(ldrPin);
+ 
+    if (ldrValue < 150) {
+        digitalWrite(ledPin, HIGH); // LED is ON
+	  display.setCursor(0,35);
+        display.print("Low Light, LED On");
+      } else {
+        digitalWrite(ledPin, LOW);  // LED is OFF
+	  display.setCursor(0,45);
+        display.print("Enough Light, LED OFF");
+      }
+ 
+  int t = dht.readTemperature();
+  int h = dht.readHumidity();
+ 
+  if (isnan(h) || isnan(t)) {
+   //Serial.println("Failed to read from DHT sensor!");
+  }
+ 
+  display.clearDisplay();
+  display.setCursor(0,10);
+  display.print("Temperature: ");
+  display.setCursor(75,10);
+  display.print(t);
+  display.print(" ");
+  display.cp437(true);
+  display.write(167);
+  display.print("C");
+
+  display.setCursor(0, 25);
+  display.print("Humidity: ");
+  display.setCursor(55, 25);
+  display.print(h);
+  display.print(" %");
+  display.display();
+  
+  message = message + ldrValue + "," + t + "," + h;
+  Serial.println(message);
+  message = "";  
+
+  delay(1500);
+} 
